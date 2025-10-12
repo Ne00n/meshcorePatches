@@ -1,0 +1,50 @@
+diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
+index 3772fc1..d9626c3 100644
+--- a/examples/companion_radio/MyMesh.cpp
++++ b/examples/companion_radio/MyMesh.cpp
+@@ -673,6 +673,8 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+   _prefs.bw = LORA_BW;
+   _prefs.cr = LORA_CR;
+   _prefs.tx_power_dbm = LORA_TX_POWER;
++  _prefs.disable_fwd = 0;
++  _prefs.flood_max = 64;
+   //_prefs.rx_delay_base = 10.0f;  enable once new algo fixed
+ }
+ 
+@@ -1696,6 +1698,12 @@ void MyMesh::checkSerialInterface() {
+   }
+ }
+ 
++bool MyMesh::allowPacketForward(const mesh::Packet *packet) {
++  if (_prefs.disable_fwd) return false;
++  if (packet->isRouteFlood() && packet->path_len >= _prefs.flood_max) return false;
++  return true;
++}
++
+ void MyMesh::loop() {
+   BaseChatMesh::loop();
+ 
+diff --git a/examples/companion_radio/MyMesh.h b/examples/companion_radio/MyMesh.h
+index d2a6649..a2492e9 100644
+--- a/examples/companion_radio/MyMesh.h
++++ b/examples/companion_radio/MyMesh.h
+@@ -102,6 +102,7 @@ public:
+   int  getRecentlyHeard(AdvertPath dest[], int max_num);
+ 
+ protected:
++  bool allowPacketForward(const mesh::Packet* packet) override;
+   float getAirtimeBudgetFactor() const override;
+   int getInterferenceThreshold() const override;
+   int calcRxDelay(float score, uint32_t air_time) const override;
+diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
+index bfde721..66b2f10 100644
+--- a/examples/companion_radio/NodePrefs.h
++++ b/examples/companion_radio/NodePrefs.h
+@@ -24,4 +24,6 @@ struct NodePrefs {  // persisted to file
+   float rx_delay_base;
+   uint32_t ble_pin;
+   uint8_t  advert_loc_policy;
++  uint8_t disable_fwd;
++  uint8_t flood_max;
+ };
+\ No newline at end of file
