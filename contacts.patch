@@ -1,0 +1,27 @@
+diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
+index 3772fc1..0521b15 100644
+--- a/examples/companion_radio/MyMesh.cpp
++++ b/examples/companion_radio/MyMesh.cpp
+@@ -266,6 +266,22 @@ void MyMesh::onDiscoveredContact(ContactInfo &contact, bool is_new, uint8_t path
+ #endif
+   }
+ 
++  // Reply with our own contact information when a new contact is discovered
++  if (is_new) {
++    // Create a self-advertisement packet to send back to the new contact
++    mesh::Packet* reply_pkt;
++    if (_prefs.advert_loc_policy == ADVERT_LOC_NONE) {
++      reply_pkt = createSelfAdvert(_prefs.node_name);
++    } else {
++      reply_pkt = createSelfAdvert(_prefs.node_name, sensors.node_lat, sensors.node_lon);
++    }
++    
++    if (reply_pkt) {
++      // Send the self-advertisement using flooding to ensure it reaches the new contact
++      sendFlood(reply_pkt);
++    }
++  }
++
+   // add inbound-path to mem cache
+   if (path && path_len <= sizeof(AdvertPath::path)) {  // check path is valid
+     AdvertPath* p = advert_paths;
