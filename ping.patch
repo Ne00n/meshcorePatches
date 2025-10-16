@@ -1,8 +1,8 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index 3772fc1..9336c6b 100644
+index 3772fc1..125ec46 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
-@@ -381,6 +381,16 @@ void MyMesh::queueMessage(const ContactInfo &from, uint8_t txt_type, mesh::Packe
+@@ -381,6 +381,18 @@ void MyMesh::queueMessage(const ContactInfo &from, uint8_t txt_type, mesh::Packe
  void MyMesh::onMessageRecv(const ContactInfo &from, mesh::Packet *pkt, uint32_t sender_timestamp,
                             const char *text) {
    markConnectionActive(from); // in case this is from a server, and we have a connection
@@ -14,6 +14,8 @@ index 3772fc1..9336c6b 100644
 +    uint32_t est_timeout = 0;
 +    sendMessage(from, sender_timestamp, 0, "pong", expected_ack, est_timeout);
 +    MESH_DEBUG_PRINTLN("Received ping from %s, replied with pong", from.name);
++    // Don't queue the ping message to keep chat history clean
++    return;
 +  }
 +  
    queueMessage(from, TXT_TYPE_PLAIN, pkt, sender_timestamp, NULL, 0, text);
