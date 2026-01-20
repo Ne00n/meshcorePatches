@@ -1,8 +1,8 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index 59a0078..8413527 100644
+index c80e286..c90a056 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
-@@ -241,6 +241,21 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
+@@ -255,6 +255,21 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
    return (int)((pow(_prefs.rx_delay_base, 0.85f - score) - 1.0) * air_time);
  }
  
@@ -24,7 +24,7 @@ index 59a0078..8413527 100644
  uint8_t MyMesh::getExtraAckTransmitCount() const {
    return _prefs.multi_acks;
  }
-@@ -742,6 +757,10 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+@@ -801,6 +816,10 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
    _prefs.tx_power_dbm = LORA_TX_POWER;
    _prefs.gps_enabled = 0;       // GPS disabled by default
    _prefs.gps_interval = 0;      // No automatic GPS updates by default
@@ -36,7 +36,7 @@ index 59a0078..8413527 100644
  }
  
 diff --git a/examples/companion_radio/MyMesh.h b/examples/companion_radio/MyMesh.h
-index 1fcc569..59f3012 100644
+index a2b0033..d7a87aa 100644
 --- a/examples/companion_radio/MyMesh.h
 +++ b/examples/companion_radio/MyMesh.h
 @@ -108,6 +108,9 @@ protected:
@@ -50,13 +50,13 @@ index 1fcc569..59f3012 100644
    void sendFloodScoped(const ContactInfo& recipient, mesh::Packet* pkt, uint32_t delay_millis=0) override;
    void sendFloodScoped(const mesh::GroupChannel& channel, mesh::Packet* pkt, uint32_t delay_millis=0) override;
 diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
-index e9db544..9e552d4 100644
+index 62cd416..bad713e 100644
 --- a/examples/companion_radio/NodePrefs.h
 +++ b/examples/companion_radio/NodePrefs.h
-@@ -27,4 +27,8 @@ struct NodePrefs {  // persisted to file
-   uint8_t  buzzer_quiet;
+@@ -28,4 +28,8 @@ struct NodePrefs {  // persisted to file
    uint8_t  gps_enabled;      // GPS enabled flag (0=disabled, 1=enabled)
    uint32_t gps_interval;     // GPS read interval in seconds
+   uint8_t autoadd_config;    // bitmask for auto-add contacts config
 +  bool     disable_fwd;
 +  uint8_t  flood_max;
 +  float    tx_delay_factor;
