@@ -1,5 +1,5 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index c80e286..0cd1da7 100644
+index c80e286..aa7267e 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
 @@ -2,6 +2,7 @@
@@ -10,15 +10,27 @@ index c80e286..0cd1da7 100644
  
  #define CMD_APP_START                 1
  #define CMD_SEND_TXT_MSG              2
-@@ -255,6 +256,22 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
+@@ -255,6 +256,34 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
    return (int)((pow(_prefs.rx_delay_base, 0.85f - score) - 1.0) * air_time);
  }
  
 +bool MyMesh::allowPacketForward(const mesh::Packet *packet) {
-+  // if node_name contains "repeater", forwarding is enabled
-+  if (strstr(_prefs.node_name, "repeater") == NULL) return false;
-+  if (packet->isRouteFlood() && packet->path_len >= _prefs.flood_max) return false;
-+  return true;
++  if (strstr(_prefs.node_name, "rptrl") != NULL) {
++    if (packet->isRouteFlood() && packet->path_len >= _prefs.flood_max) return false;
++    switch (packet->getPayloadType()) {
++      case PAYLOAD_TYPE_TXT_MSG:
++      case PAYLOAD_TYPE_GRP_TXT:
++      case PAYLOAD_TYPE_GRP_DATA:
++        return true;
++      default:
++        return false;
++    }
++  } else if (strstr(_prefs.node_name, "rptr") != NULL) {
++    if (packet->isRouteFlood() && packet->path_len >= _prefs.flood_max) return false;
++    return true;
++  } else {
++    return false;
++  }
 +}
 +
 +uint32_t MyMesh::getRetransmitDelay(const mesh::Packet *packet) {
@@ -33,7 +45,7 @@ index c80e286..0cd1da7 100644
  uint8_t MyMesh::getExtraAckTransmitCount() const {
    return _prefs.multi_acks;
  }
-@@ -801,6 +818,9 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+@@ -801,6 +830,9 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
    _prefs.tx_power_dbm = LORA_TX_POWER;
    _prefs.gps_enabled = 0;       // GPS disabled by default
    _prefs.gps_interval = 0;      // No automatic GPS updates by default
