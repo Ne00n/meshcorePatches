@@ -1,13 +1,22 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index c80e286..c90a056 100644
+index c80e286..0cd1da7 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
-@@ -255,6 +255,21 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
+@@ -2,6 +2,7 @@
+ 
+ #include <Arduino.h> // needed for PlatformIO
+ #include <Mesh.h>
++#include <string.h>
+ 
+ #define CMD_APP_START                 1
+ #define CMD_SEND_TXT_MSG              2
+@@ -255,6 +256,22 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
    return (int)((pow(_prefs.rx_delay_base, 0.85f - score) - 1.0) * air_time);
  }
  
 +bool MyMesh::allowPacketForward(const mesh::Packet *packet) {
-+  if (_prefs.disable_fwd) return false;
++  // if node_name contains "repeater", forwarding is enabled
++  if (strstr(_prefs.node_name, "repeater") == NULL) return false;
 +  if (packet->isRouteFlood() && packet->path_len >= _prefs.flood_max) return false;
 +  return true;
 +}
@@ -24,11 +33,10 @@ index c80e286..c90a056 100644
  uint8_t MyMesh::getExtraAckTransmitCount() const {
    return _prefs.multi_acks;
  }
-@@ -801,6 +816,10 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+@@ -801,6 +818,9 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
    _prefs.tx_power_dbm = LORA_TX_POWER;
    _prefs.gps_enabled = 0;       // GPS disabled by default
    _prefs.gps_interval = 0;      // No automatic GPS updates by default
-+  _prefs.disable_fwd = false;
 +  _prefs.flood_max = 64;
 +  _prefs.tx_delay_factor = 0.5f;
 +  _prefs.direct_tx_delay_factor = 0.2f;
@@ -50,14 +58,13 @@ index a2b0033..d7a87aa 100644
    void sendFloodScoped(const ContactInfo& recipient, mesh::Packet* pkt, uint32_t delay_millis=0) override;
    void sendFloodScoped(const mesh::GroupChannel& channel, mesh::Packet* pkt, uint32_t delay_millis=0) override;
 diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
-index 62cd416..bad713e 100644
+index 62cd416..30a6ab4 100644
 --- a/examples/companion_radio/NodePrefs.h
 +++ b/examples/companion_radio/NodePrefs.h
-@@ -28,4 +28,8 @@ struct NodePrefs {  // persisted to file
+@@ -28,4 +28,7 @@ struct NodePrefs {  // persisted to file
    uint8_t  gps_enabled;      // GPS enabled flag (0=disabled, 1=enabled)
    uint32_t gps_interval;     // GPS read interval in seconds
    uint8_t autoadd_config;    // bitmask for auto-add contacts config
-+  bool     disable_fwd;
 +  uint8_t  flood_max;
 +  float    tx_delay_factor;
 +  float    direct_tx_delay_factor;
