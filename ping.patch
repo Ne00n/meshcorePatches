@@ -1,14 +1,14 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index c80e286..eb2bd8e 100644
+index 9bb747e..63e778d 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
-@@ -480,6 +480,31 @@ void MyMesh::sendFloodScoped(const mesh::GroupChannel& channel, mesh::Packet* pk
+@@ -481,6 +481,31 @@ void MyMesh::sendFloodScoped(const mesh::GroupChannel& channel, mesh::Packet* pk
  void MyMesh::onMessageRecv(const ContactInfo &from, mesh::Packet *pkt, uint32_t sender_timestamp,
                             const char *text) {
    markConnectionActive(from); // in case this is from a server, and we have a connection
 +  
 +  // Check for ping message and reply with pong
-+  if ((strcmp(text, "ping") == 0 || strcmp(text, "p") == 0) && strstr(getNodeName(), "ping") != NULL) {
++  if ((strcasecmp(text, "ping") == 0 || strcasecmp(text, "p") == 0) && strstr(getNodeName(), "ping") != NULL) {
 +    // Get connection information
 +    bool is_direct = (pkt->path_len == 0 || pkt->path_len == 0xFF);
 +    int hop_count = is_direct ? 0 : pkt->path_len;
