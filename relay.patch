@@ -61,10 +61,19 @@ index 3b98a4f6..df57c591 100644
    void sendFloodScoped(const TransportKey& scope, mesh::Packet* pkt, uint32_t delay_millis);
    void sendFloodScoped(const ContactInfo& recipient, mesh::Packet* pkt, uint32_t delay_millis=0) override;
 diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
-index 846ff169..76f28485 100644
+index 846ff169..275efc5e 100644
 --- a/examples/companion_radio/NodePrefs.h
 +++ b/examples/companion_radio/NodePrefs.h
-@@ -36,6 +36,9 @@ public:
+@@ -27,8 +27,6 @@ public:
+   uint8_t telemetry_mode_loc = 0;
+   uint8_t telemetry_mode_env = 0;
+   float rx_delay_base = 0;
+-  float tx_delay_factor = 0;
+-  float direct_tx_delay_factor = 0;
+   uint32_t ble_pin = 0;
+   uint8_t  advert_loc_policy = 0;
+   uint8_t  buzzer_quiet = 0;
+@@ -36,6 +34,9 @@ public:
    uint8_t  gps_enabled = 0;      // GPS enabled flag (0=disabled, 1=enabled)
    uint32_t gps_interval = 0;     // GPS read interval in seconds
    uint8_t autoadd_config = 0;    // bitmask for auto-add contacts config
