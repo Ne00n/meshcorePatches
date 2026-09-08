@@ -1,5 +1,5 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index 46c8e2f6..8a57ed9d 100644
+index 46c8e2f6..cc7eae98 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
 @@ -2,6 +2,7 @@
@@ -36,30 +36,26 @@ index 46c8e2f6..8a57ed9d 100644
  uint32_t MyMesh::getRetransmitDelay(const mesh::Packet *packet) {
    uint32_t t = (_radio->getEstAirtimeFor(packet->getPathByteLen() + packet->payload_len + 2) * _prefs.tx_delay_factor);
    return getRNG()->nextInt(0, 5*t + 1);
-@@ -954,6 +974,10 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+@@ -535,10 +555,6 @@ bool MyMesh::filterRecvFloodPacket(mesh::Packet* packet) {
+   return false;
+ }
+ 
+-bool MyMesh::allowPacketForward(const mesh::Packet* packet) {
+-  return _prefs.isRepeatEn();
+-}
+-
+ void MyMesh::sendFloodScoped(const TransportKey& scope, mesh::Packet* pkt, uint32_t delay_millis) {
+   if (scope.isNull()) {
+     sendFlood(pkt, delay_millis, _prefs.path_hash_mode + 1);
+@@ -954,6 +970,8 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
    _prefs.tx_power_dbm = LORA_TX_POWER;
    _prefs.gps_enabled = 0;       // GPS disabled by default
    _prefs.gps_interval = 0;      // No automatic GPS updates by default
 +  _prefs.flood_max = 64;
-+  _prefs.tx_delay_factor = 0.5f;
-+  _prefs.direct_tx_delay_factor = 0.2f;
 +
    _prefs.radio_fem_rxgain = 1;
    _prefs.radio_fem_txgain = 0;
    //_prefs.rx_delay_base = 10.0f;  enable once new algo fixed
-diff --git a/examples/companion_radio/MyMesh.h b/examples/companion_radio/MyMesh.h
-index 3b98a4f6..df57c591 100644
---- a/examples/companion_radio/MyMesh.h
-+++ b/examples/companion_radio/MyMesh.h
-@@ -130,6 +130,8 @@ protected:
-   uint8_t getExtraAckTransmitCount() const override;
-   bool filterRecvFloodPacket(mesh::Packet* packet) override;
-   bool allowPacketForward(const mesh::Packet* packet) override;
-+  uint32_t getRetransmitDelay(const mesh::Packet* packet) override;
-+  uint32_t getDirectRetransmitDelay(const mesh::Packet* packet) override;
- 
-   void sendFloodScoped(const TransportKey& scope, mesh::Packet* pkt, uint32_t delay_millis);
-   void sendFloodScoped(const ContactInfo& recipient, mesh::Packet* pkt, uint32_t delay_millis=0) override;
 diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
 index 846ff169..275efc5e 100644
 --- a/examples/companion_radio/NodePrefs.h
