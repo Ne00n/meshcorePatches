@@ -1,16 +1,16 @@
 diff --git a/examples/companion_radio/MyMesh.cpp b/examples/companion_radio/MyMesh.cpp
-index 46c8e2f6..cc7eae98 100644
+index f32ea67a..28e8e5bc 100644
 --- a/examples/companion_radio/MyMesh.cpp
 +++ b/examples/companion_radio/MyMesh.cpp
-@@ -2,6 +2,7 @@
- 
- #include <Arduino.h> // needed for PlatformIO
+@@ -5,6 +5,7 @@
+ #include <WiFi.h>
+ #endif
  #include <Mesh.h>
-
 +#include <string.h>
  
-
-@@ -276,6 +277,25 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
+ #define CMD_APP_START                 1
+ #define CMD_SEND_TXT_MSG              2
+@@ -275,6 +276,25 @@ int MyMesh::calcRxDelay(float score, uint32_t air_time) const {
    return (int)((pow(_prefs.rx_delay_base, 0.85f - score) - 1.0) * air_time);
  }
  
@@ -36,7 +36,7 @@ index 46c8e2f6..cc7eae98 100644
  uint32_t MyMesh::getRetransmitDelay(const mesh::Packet *packet) {
    uint32_t t = (_radio->getEstAirtimeFor(packet->getPathByteLen() + packet->payload_len + 2) * _prefs.tx_delay_factor);
    return getRNG()->nextInt(0, 5*t + 1);
-@@ -535,10 +555,6 @@ bool MyMesh::filterRecvFloodPacket(mesh::Packet* packet) {
+@@ -484,10 +504,6 @@ bool MyMesh::filterRecvFloodPacket(mesh::Packet* packet) {
    return false;
  }
  
@@ -47,35 +47,23 @@ index 46c8e2f6..cc7eae98 100644
  void MyMesh::sendFloodScoped(const TransportKey& scope, mesh::Packet* pkt, uint32_t delay_millis) {
    if (scope.isNull()) {
      sendFlood(pkt, delay_millis, _prefs.path_hash_mode + 1);
-@@ -954,6 +970,8 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
+@@ -925,6 +941,7 @@ MyMesh::MyMesh(mesh::Radio &radio, mesh::RNG &rng, mesh::RTCClock &rtc, SimpleMe
    _prefs.tx_power_dbm = LORA_TX_POWER;
    _prefs.gps_enabled = 0;       // GPS disabled by default
    _prefs.gps_interval = 0;      // No automatic GPS updates by default
 +  _prefs.flood_max = 64;
-+
    _prefs.radio_fem_rxgain = 1;
-   _prefs.radio_fem_txgain = 0;
-   //_prefs.rx_delay_base = 10.0f;  enable once new algo fixed
+ #ifdef RADIO_FEM_TXGAIN
+   _prefs.radio_fem_txgain = RADIO_FEM_TXGAIN;   // board-specific default for PA
 diff --git a/examples/companion_radio/NodePrefs.h b/examples/companion_radio/NodePrefs.h
-index 846ff169..275efc5e 100644
+index 46a3dbb7..bb89bf74 100644
 --- a/examples/companion_radio/NodePrefs.h
 +++ b/examples/companion_radio/NodePrefs.h
-@@ -27,8 +27,6 @@ public:
-   uint8_t telemetry_mode_loc = 0;
+@@ -28,6 +28,7 @@ public:
    uint8_t telemetry_mode_env = 0;
    float rx_delay_base = 0;
--  float tx_delay_factor = 0;
--  float direct_tx_delay_factor = 0;
+   float tx_delay_factor = 0;
++  uint8_t flood_max;
+   float direct_tx_delay_factor = 0;
    uint32_t ble_pin = 0;
    uint8_t  advert_loc_policy = 0;
-   uint8_t  buzzer_quiet = 0;
-@@ -36,6 +34,9 @@ public:
-   uint8_t  gps_enabled = 0;      // GPS enabled flag (0=disabled, 1=enabled)
-   uint32_t gps_interval = 0;     // GPS read interval in seconds
-   uint8_t autoadd_config = 0;    // bitmask for auto-add contacts config
-+  uint8_t flood_max;
-+  float tx_delay_factor;
-+  float direct_tx_delay_factor;
-   uint8_t rx_boosted_gain = 0; // SX126x RX boosted gain mode (0=power saving, 1=boosted)
-   uint8_t radio_fem_rxgain = 0; // external LoRa FEM RX gain (LNA)
-   uint8_t radio_fem_txgain = 0; // external LoRa FEM TX gain (low by default)
